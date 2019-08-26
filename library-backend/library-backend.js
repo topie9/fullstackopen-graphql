@@ -82,6 +82,7 @@ const resolvers = {
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
       const books = await Book.find({})
+      .populate('author', { name: 1, })
       
       const booksAuthorOrNo = !args.author 
         ? books 
@@ -90,16 +91,18 @@ const resolvers = {
       const booksGenreOrNo = !args.genre
         ? booksAuthorOrNo
         : booksAuthorOrNo.filter(b => b.genres.includes(args.genre))
+        console.log(booksGenreOrNo)
       return booksGenreOrNo
     },
     allAuthors: async (root, args) => {
       try {
         const authors = await Author.find({})
-
+        
         return await Promise.all(authors.map(async a => {
           const authorBooks = await Book.find({ author: { $in: a._id } })  
           return (
             author = {
+              id: a._id,
               name: a.name,
               born: a.born,
               bookCount: authorBooks.length
