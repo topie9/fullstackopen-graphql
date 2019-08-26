@@ -4,6 +4,10 @@ const LoginForm = (props) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
+  if (!props.show) {
+    return null
+  }
+
   const submitLogin = async (e) => {
     e.preventDefault()
 
@@ -15,6 +19,9 @@ const LoginForm = (props) => {
       const token = result.data.login.value
       props.setToken(token)
       localStorage.setItem('library-user-token', token)
+      setUsername('')
+      setPassword('')
+      props.redirectPage()
     }
   }
 

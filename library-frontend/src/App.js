@@ -48,7 +48,9 @@ const ADD_BOOK = gql`
       genres: $genres
     ) {
       title
-      author
+      author {
+        name
+      }
       published
       genres
       id
@@ -82,6 +84,7 @@ const App = () => {
   }
 
   const handleError = (error) => {
+    console.log(error)
     setErrorMessage(error.graphQLErrors[0].message)
     setTimeout(() => {
       setErrorMessage(null)
@@ -106,26 +109,16 @@ const App = () => {
     {errorMessage}
   </div>
 
-  if (!token) {
-    return (
-      <div>
-        {errorNotification()}
-        <h2>login</h2>
-        <LoginForm 
-          login={login}
-          setToken={(token) => setToken(token)}
-        />
-      </div>
-    )
-  }
-
   return (
     <div>
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
-        <button onClick={logout}>logout</button>
+        {token
+          ? <button onClick={() => setPage('add')}>add book</button>
+          : <button onClick={() => setPage('login')}>login</button>
+        }
+        {token && <button onClick={logout}>logout</button>}
       </div>
 
       {errorNotification()}
@@ -133,6 +126,7 @@ const App = () => {
       <Authors
         result={authors}
         editAuthor={editAuthor}
+        token={token}
         show={page === 'authors'}
       />
 
@@ -144,6 +138,13 @@ const App = () => {
       <NewBook
         addBook={addBook}
         show={page === 'add'}
+      />
+
+      <LoginForm 
+        login={login}
+        setToken={(token) => setToken(token)}
+        show={page === 'login'}
+        redirectPage={() => setPage('authors')}
       />
 
     </div>

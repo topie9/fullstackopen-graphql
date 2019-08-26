@@ -32,7 +32,7 @@ const typeDefs = gql`
   type Author {
     name: String!
     born: Int
-    bookCount: Int!
+    bookCount: Int
     id: ID!
   }
 
@@ -91,7 +91,7 @@ const resolvers = {
       const booksGenreOrNo = !args.genre
         ? booksAuthorOrNo
         : booksAuthorOrNo.filter(b => b.genres.includes(args.genre))
-        console.log(booksGenreOrNo)
+
       return booksGenreOrNo
     },
     allAuthors: async (root, args) => {
@@ -144,7 +144,7 @@ const resolvers = {
         const bookObj = await book.save()
         bookObj.author.name = authorObj.name
         bookObj.author.id = authorObj._id
-  
+
         return bookObj
 
       } catch (error) {
