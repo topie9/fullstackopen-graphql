@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, } from 'react'
 import { gql } from 'apollo-boost'
 import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
+import Recommend from './components/Recommend'
 
 const LOGIN = gql`
   mutation login($username: String!, $password: String!) {
@@ -37,6 +38,16 @@ const ALL_BOOKS = gql`
       id
     }
   }
+`
+
+const USER = gql`
+   {
+     me {
+        username
+        favoriteGenre
+        id
+      }
+   }
 `
 
 const ADD_BOOK = gql`
@@ -72,10 +83,18 @@ const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [user, setUser] = useState(null)
 
   const client = useApolloClient()
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
+
+  const getUser = async () => {
+    const { data } = await client.query({
+      query: USER,
+    })
+    setUser(data.me)
+  }
 
   const logout = () => {
     setToken(null)
@@ -109,6 +128,11 @@ const App = () => {
     {errorMessage}
   </div>
 
+  const switchRecommend = () => {
+    setPage('recommend')
+    getUser()
+  }
+
   return (
     <div>
       <div>
@@ -118,6 +142,7 @@ const App = () => {
           ? <button onClick={() => setPage('add')}>add book</button>
           : <button onClick={() => setPage('login')}>login</button>
         }
+        {token && <button onClick={() => switchRecommend()}>recommend</button>}
         {token && <button onClick={logout}>logout</button>}
       </div>
 
@@ -126,7 +151,6 @@ const App = () => {
       <Authors
         result={authors}
         editAuthor={editAuthor}
-        token={token}
         show={page === 'authors'}
       />
 
@@ -145,6 +169,12 @@ const App = () => {
         setToken={(token) => setToken(token)}
         show={page === 'login'}
         redirectPage={() => setPage('authors')}
+      />
+
+      <Recommend
+        result={books}
+        user={user}
+        show={page === 'recommend'}
       />
 
     </div>
