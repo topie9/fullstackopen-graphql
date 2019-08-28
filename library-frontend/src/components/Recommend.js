@@ -11,7 +11,7 @@ const Recommend = (props) => {
     }
   },[props.user, props.result.data.allBooks])
 
-  if (!props.show) {
+  if (!props.show || !props.user) {
     return null
   }
   if (props.result.loading) {

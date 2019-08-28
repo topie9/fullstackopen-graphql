@@ -1,4 +1,4 @@
-import React, { useState, } from 'react'
+import React, { useState, useEffect } from 'react'
 import { gql } from 'apollo-boost'
 import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import Authors from './components/Authors'
@@ -89,12 +89,15 @@ const App = () => {
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
 
-  const getUser = async () => {
-    const { data } = await client.query({
-      query: USER,
-    })
-    setUser(data.me)
-  }
+  useEffect(() => {
+    if (token) {
+      client.query({
+        query: USER,
+      }).then(res => setUser(res.data.me))
+    } else if (!token) {
+      setUser(null)
+    }
+  },[token])
 
   const logout = () => {
     setToken(null)
@@ -128,11 +131,6 @@ const App = () => {
     {errorMessage}
   </div>
 
-  const switchRecommend = () => {
-    setPage('recommend')
-    getUser()
-  }
-
   return (
     <div>
       <div>
@@ -142,7 +140,7 @@ const App = () => {
           ? <button onClick={() => setPage('add')}>add book</button>
           : <button onClick={() => setPage('login')}>login</button>
         }
-        {token && <button onClick={() => switchRecommend()}>recommend</button>}
+        {token && <button onClick={() => setPage('recommend')}>recommend</button>}
         {token && <button onClick={logout}>logout</button>}
       </div>
 
