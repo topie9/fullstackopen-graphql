@@ -47,7 +47,7 @@ const Authors = (props) => {
           )}
         </tbody>
       </table>
-      {props.token &&
+      {props.user &&
         <div>
           <h3>Set birthyear</h3>
           <form onSubmit={editBorn}>

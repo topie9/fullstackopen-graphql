@@ -173,6 +173,7 @@ const App = () => {
       <Authors
         result={authors}
         editAuthor={editAuthor}
+        user={user}
         show={page === 'authors'}
       />
 
