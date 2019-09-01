@@ -10,18 +10,21 @@ const LoginForm = (props) => {
 
   const submitLogin = async (e) => {
     e.preventDefault()
-
-    const result = await props.login({
-      variables: { username, password }
-    })
-
-    if (result) {
-      const token = result.data.login.value
-      props.setToken(token)
-      localStorage.setItem('library-user-token', token)
-      setUsername('')
-      setPassword('')
-      props.redirectPage()
+    try {
+      const result = await props.login({
+        variables: { username, password }
+      })
+  
+      if (result) {
+        const token = result.data.login.value
+        props.setToken(token)
+        localStorage.setItem('library-user-token', token)
+        setUsername('')
+        setPassword('')
+        props.redirectPage()
+      } 
+    } catch(error) {
+      console.log(error)
     }
   }
 

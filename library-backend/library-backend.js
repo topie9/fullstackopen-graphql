@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken')
 const Book = require('./models/book')
 const Author = require('./models/author')
 const User = require('./models/user')
+const { PubSub } = require('apollo-server')
+const pubsub = new PubSub()
 
 mongoose.set('useFindAndModify', false)
 
@@ -74,6 +76,10 @@ const typeDefs = gql`
       password: String!
     ): Token
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }
 `
 
 const resolvers = {
@@ -82,7 +88,7 @@ const resolvers = {
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
       const books = await Book.find({})
-      .populate('author', { name: 1, })
+        .populate('author', { name: 1, })
       
       const booksAuthorOrNo = !args.author 
         ? books 
@@ -145,6 +151,8 @@ const resolvers = {
         bookObj.author.name = authorObj.name
         bookObj.author.id = authorObj._id
 
+        pubsub.publish('BOOK_ADDED', { bookAdded: bookObj })
+
         return bookObj
 
       } catch (error) {
@@ -200,7 +208,12 @@ const resolvers = {
         console.log(error)
       }
     },
-  }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
+    },
+  },
 }
 
 const server = new ApolloServer({
@@ -218,6 +231,7 @@ const server = new ApolloServer({
   }
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`)
+  console.log(`Subscritions ready at ${subscriptionsUrl}`)
 })
